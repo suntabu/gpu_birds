@@ -15,6 +15,10 @@ public class FlockRunner : MonoBehaviour
 
 	public MeshRenderer positionQuad, velocityQuad;
 
+	public GameObject prefab;
+
+	GameObject[] goes;
+
 	void Start ()
 	{
 		positionRT = new RenderTexture (width, width, 24);
@@ -30,10 +34,27 @@ public class FlockRunner : MonoBehaviour
 
 		velocityQuad.material.SetTexture (positionTexKey, positionRT);
 		velocityQuad.material.SetTexture (velocityTexKey, velocityRT);
+
+		goes = new GameObject[width];
+		for (int i = 0; i < width; i++) {
+			goes [i] = Instantiate (prefab);
+		}
+
+
+
 	}
 
 	void Update ()
 	{
-		
+		RenderTexture.active = positionRT;// The RenderTexture.
+		Texture2D positionData = new Texture2D (positionRT.width, positionRT.height);
+		positionData.ReadPixels (new Rect (0, 0, width, width), 0, 0);
+
+		for (int i = 0; i < width; i++) {
+			var go = goes [i];
+			var rgb = positionData.GetPixel (i, 0);
+			go.transform.position = new Vector3 (rgb.r, rgb.g, rgb.b) * 100;
+		}
+
 	}
 }
