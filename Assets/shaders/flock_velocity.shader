@@ -15,8 +15,6 @@
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
-            // make fog work
-            #pragma multi_compile_fog
             
             #include "UnityCG.cginc"
 
@@ -68,7 +66,6 @@
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.uv = TRANSFORM_TEX(v.uv, _PositionTex);
-                UNITY_TRANSFER_FOG(o,o.vertex);
                 return o;
             }
             
@@ -111,7 +108,7 @@
 				dist = length( dir );
 				dir.y *= 2.5;
 				velocity -= normalize( dir ) * unity_DeltaTime * 5.;
-
+ 
 				birdPosition = tex2D( _PositionTex, i.uv ).xyz;
 				dir = birdPosition - selfPosition;
 				dist = length(dir);

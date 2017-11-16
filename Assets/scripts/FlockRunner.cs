@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class FlockRunner : MonoBehaviour
 {
-	public int width = 64;
+	public int width = 8;
 
 	public Camera camera, camera1;
 
@@ -18,6 +18,8 @@ public class FlockRunner : MonoBehaviour
 	public GameObject prefab;
 
 	GameObject[] goes;
+
+	private int count;
 
 	void Start ()
 	{
@@ -35,8 +37,9 @@ public class FlockRunner : MonoBehaviour
 		velocityQuad.material.SetTexture (positionTexKey, positionRT);
 		velocityQuad.material.SetTexture (velocityTexKey, velocityRT);
 
-		goes = new GameObject[width];
-		for (int i = 0; i < width; i++) {
+		count = width * width;
+		goes = new GameObject[count];
+		for (int i = 0; i < count; i++) {
 			goes [i] = Instantiate (prefab);
 		}
 
@@ -50,9 +53,11 @@ public class FlockRunner : MonoBehaviour
 		Texture2D positionData = new Texture2D (positionRT.width, positionRT.height);
 		positionData.ReadPixels (new Rect (0, 0, width, width), 0, 0);
 
-		for (int i = 0; i < width; i++) {
+		for (int i = 0; i < count; i++) {
 			var go = goes [i];
-			var rgb = positionData.GetPixel (i, 0);
+			var x = i / width;
+			var y = i % width;
+			var rgb = positionData.GetPixel (x, y);
 			go.transform.position = new Vector3 (rgb.r, rgb.g, rgb.b) * 100;
 		}
 
