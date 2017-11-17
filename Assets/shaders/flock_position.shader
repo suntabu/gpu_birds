@@ -47,14 +47,16 @@
             
             fixed4 frag (v2f i) : SV_Target
             {
+            	float w = 1 /800.0;
+
 				half4 tmpPos = tex2D( _PositionTex, i.uv );
-				half3 position = tmpPos.xyz;
-				half3 velocity = tex2D( _VelocityTex, i.uv ).xyz;
-				float phase = tmpPos.w;
-				phase = fmod( ( phase + unity_DeltaTime +
-					length( velocity.xz ) * unity_DeltaTime * 3. +
-					max( velocity.y, 0.0 ) * unity_DeltaTime * 6. ), 62.83 );
-				half4 col = half4( position + velocity * unity_DeltaTime * 15. , phase );
+				half3 position = tmpPos.xyz / w;
+				half4 tmpV = tex2D( _VelocityTex, i.uv );
+				half3 velocity = tmpV.xyz;
+
+				position += sin(_Time.y / 2) * fixed3(1,1,1) / w;
+ 				position *= w;
+				half4 col = half4(position , 1 );
 				return col;
             }
             ENDCG
