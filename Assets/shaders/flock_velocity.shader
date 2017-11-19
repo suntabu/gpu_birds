@@ -2,8 +2,9 @@
 {
     Properties
     {
-        _PositionTex ("Position Texture", 2D) = "white" {}
         _MainTex ("Main Texture",2D) = "white" {}
+        _PositionTex ("Position Texture", 2D) = "white" {}
+
     }
     SubShader
     {
@@ -20,15 +21,15 @@
 
            
 
-            sampler2D _PositionTex;
-            sampler2D _MainTex;
+            uniform sampler2D _PositionTex;
+            uniform sampler2D _MainTex;
             
 
             uniform float time;
 			uniform float testing;
             uniform float delta =0.016; // about 0.016
-			uniform float seperationDistance; // 20
-			uniform float alignmentDistance; // 40
+			uniform float seperationDistance = 20; // 20
+			uniform float alignmentDistance = 40; // 40
 			uniform float cohesionDistance; //
 			uniform float freedomFactor;
 			uniform half3 predator;
@@ -54,25 +55,20 @@
             
             fixed4 frag (v2f_img i) : COLOR
             {
-            	float w = 800;
-            	float v = 10;
-            	
 	            zoneRadius = seperationDistance + alignmentDistance + cohesionDistance;
                 separationThresh = seperationDistance / zoneRadius;
                 alignmentThresh = ( seperationDistance + alignmentDistance ) / zoneRadius;
                 zoneRadiusSquared = zoneRadius * zoneRadius;
                 fixed2 uv = i.uv;
                 fixed3 birdPosition, birdVelocity;
-                fixed3 selfPosition = tex2D( _PositionTex, uv ).xyz;
-
-                selfPosition *= w;
-                selfPosition -= w/2;
 
 
-                fixed3 selfVelocity = tex2D( _PositionTex, uv ).xyz;
+                fixed4 selfPosition = tex2D( _PositionTex, uv );
+                fixed3 actualSelfPos = selfPosition.xyz * selfPosition.w;
 
-                selfVelocity *= v;
-                selfVelocity -=v/2;
+                fixed3 selfVelocity = tex2D( _MainTex, uv ).xyz;
+
+                 
 
                 float dist;
                 fixed3 dir; // direction
@@ -82,7 +78,7 @@
                 float f;
                 float percent;
                 fixed3 velocity = selfVelocity;
-                float limit = SPEED_LIMIT;
+                float limit =SPEED_LIMIT ;
                 dir = predator * UPPER_BOUNDS - selfPosition;
                 dir.z = 0.;
                 // dir.z *= 0.6;
@@ -100,10 +96,13 @@
                 // if ( rand( uv + time ) < freedomFactor ) {}
                 // Attract flocks to the center
                 fixed3 central = fixed3( 0., 0., 0. );
-                dir = selfPosition - central;
+                dir = central - selfPosition  ;
+
                 dist = length( dir );
                 dir.y *= 2.5;
-                velocity -= normalize( dir ) * delta * 5.;
+                velocity -= normalize( dir ) *delta*  5.;
+                return fixed4((velocity ),1);
+                //return  fixed4( sin(selfPosition.x + selfVelocity.x),sin(selfPosition.y + selfVelocity.y),sin(selfPosition.z + selfVelocity.z), 1.0 );
                 for (float y=0.0;y < height;y++) {
                     for (float x=0.0;x<width;x++) {
                         fixed2 ref = fixed2( x + 0.5,y + 0.5 ) /fixed2(width,height) ;
@@ -122,7 +121,7 @@
                                     // Alignment - fly the same direction
                                     float threshDelta = alignmentThresh - separationThresh;
                                     float adjustedPercent = ( percent - separationThresh ) / threshDelta;
-                                    birdVelocity = tex2D( _PositionTex, ref ).xyz;
+                                    birdVelocity = tex2D( _MainTex, ref ).xyz;
                                     f = ( 0.5 - cos( adjustedPercent * PI_2 ) * 0.5 + 0.5 ) * delta;
                                     velocity += normalize(birdVelocity) * f;
                                 } else {
@@ -136,15 +135,14 @@
                        }
                     }
                 }
+
                 // this make tends to fly around than down or up
                 // if (velocity.y > 0.) velocity.y *= (1. - 0.2 * delta);
                 // Speed Limits
-                if ( length( velocity ) > limit ) {
-                    velocity = normalize( velocity ) * limit;
-                }
-
-                velocity +=v/2;
-                velocity /=v;
+                if ( length(  velocity   ) > limit ) {
+                    velocity = normalize(  velocity  ) * limit;
+                } 
+ 
 
                 return  fixed4( velocity, 1.0 );
             }

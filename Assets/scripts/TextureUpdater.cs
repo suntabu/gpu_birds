@@ -45,7 +45,8 @@ public class TextureUpdater : MonoBehaviour
             Graphics.Blit(buffer, texture);
 
             RenderTexture.active = texture;// The RenderTexture.
-
+            if(usedMat.HasProperty("_wValue"))
+                Debug.Log(usedMat.GetFloat("_wValue"));
 
             var rtData = new Texture2D(texture.width, texture.height);
             rtData.ReadPixels(new Rect(0, 0, texture.width, texture.height), 0, 0);
@@ -73,6 +74,7 @@ public class TextureUpdater : MonoBehaviour
                 var z = UnityEngine.Random.Range(0, 255) / 255f;
 
                 initialTex.SetPixel(i, j, new Color(x, y, z, 1));
+                //initialTex.SetPixel(i, j, new Color(1,1,1, 1));
             }
         }
 
